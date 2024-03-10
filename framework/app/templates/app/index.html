@@ -1,0 +1,52 @@
+{% extends template %}
+{% load sparta %}
+
+{% block header %}
+{% header 'Sparta Test' %}
+{% endblock %}
+
+{% block page %}
+<!--div hx-get="/app/form/Device" hx-trigger="load"></div-->
+<ion-accordion-group value="first">
+  <ion-accordion value="first" toggle-icon="caret-down-circle" toggle-icon-slot="start">
+    <ion-item slot="header" color="light">
+      <ion-label>Index</ion-label>
+    </ion-item>
+    <div class="ion-padding" slot="content">
+
+      <ion-list>
+        <ion-list-header>
+          <ion-label>Introduction</ion-label>
+        </ion-list-header>
+        <ion-item>
+          <ion-label>Installation</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>Tables</ion-label>
+          <ion-button>Tabulator</ion-button>
+        </ion-item>
+
+
+      </ion-list>
+
+    </div>
+  </ion-accordion>
+
+  <ion-accordion value="second" toggle-icon="caret-down-circle" toggle-icon-slot="start">
+    <ion-item slot="header" color="light">
+      <ion-label>Administration</ion-label>
+    </ion-item>
+    <div class="ion-padding" slot="content">
+      <div id="modal" style="width:100%;height:100%;"></div>
+    </div>
+  </ion-accordion>
+
+  <ion-accordion value="third" toggle-icon="caret-down-circle" toggle-icon-slot="start">
+    <ion-item slot="header" color="light">
+      <ion-label>Development</ion-label>
+    </ion-item>
+    <div class="ion-padding" slot="content">Third Content</div>
+  </ion-accordion>
+</ion-accordion-group>
+
+{% endblock %}

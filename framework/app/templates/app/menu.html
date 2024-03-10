@@ -1,0 +1,52 @@
+{% load django_htmx sparta static i18n %}
+
+<ion-menu side="start" id="start-menu" content-id="main" style="user-select: none;">
+  <ion-header>
+    <ion-toolbar color="light" class="ion-text-center">
+      <img {% part '/app/' %} src='{% static "app/img/logo.jpg" %}' class="menu-logo" />
+      <h6 class="ion-text-center">This is Sparta!</h6>
+      <small>
+        <p class="ion-text-center" onclick="App.console()">v0.0.1 test-ionic</p>
+      </small>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-accordion-group value="first">
+      <ion-accordion value="first" toggle-icon="chevron-down" toggle-icon-slot="end">
+        <ion-item slot="header" color="light">
+          <ion-label>Menu</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-list lines="none" hx-target="#main" hx-sync="this">
+            {% app_menuitem "storefront" "Index" "/" %}
+            {% app_menuitem "terminal" "Table" "/table/" %}
+          </ion-list>
+        </div>
+      </ion-accordion>
+      <ion-accordion value="second" toggle-icon="chevron-down" toggle-icon-slot="end">
+        <ion-item slot="header" color="light">
+          <ion-label>Development</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-list lines="none" hx-target="#main" hx-sync="this">
+            <ion-list-header class="ion-text-uppercase">API</ion-list-header>
+            {% app_menuitem "terminal" "Chat" "/chat/" %}
+          </ion-list>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </ion-content>
+  <ion-footer>
+    <ion-toolbar color="light">
+      <ion-buttons slot="start">
+        <ion-button {% part '/app/' %}>
+          <ion-icon name="home" slot="start"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button onclick="App.logout()">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+</ion-menu>

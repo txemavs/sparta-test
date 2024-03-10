@@ -1,0 +1,54 @@
+{% extends template %}
+{% load sparta static i18n %}
+{% block header %}
+    {% header "Nested endpoints" %}
+    
+{% endblock %}
+
+{% block footer %}
+    <pa-endpoints-search></pa-endpoints-search>
+    
+{% endblock %}
+
+{% block page %}
+<app-endpoints base='/api/v2/' style="height:100%;">
+    <pa-endpoints-grid base="/api/v2/" style="height:50%;"></pa-endpoints-grid>
+    <pa-grid endpoint="/api/v2/actions" style="height:50%;"></pa-grid>
+</app-endpoints>
+
+<!-- no need to App.define('pa-*'), boot or mutation observer will import the component-->
+<script>
+//App.define('pa-endpoints-search');
+//App.define('pa-endpoints-grid');
+//App.define('pa-grid');
+    
+    App.define('app-endpoints', class extends App.Component {
+        connectedCallback() {
+            this.style.display = 'block';
+            const paEndpoints = this.querySelector('pa-endpoints-grid');
+            const paGrid = this.querySelector('pa-grid');
+            
+            this.addEventListener('endpoints:selected:api', (e) => {
+                paGrid.endpoint = e.detail.endpoint;
+                paGrid.endpoints_row = e.detail.row;
+            });
+
+            this.addEventListener('endpoint:pk', (e) => {
+                paEndpoints.emit('endpoints:path:pk', e.detail)
+            });
+
+            this.parentElement.addEventListener('main:search', function (e) {
+                let endpoint = paGrid.endpoint;
+                if (endpoint.includes('?search=')) {
+                    endpoint = endpoint.replace(/\?search=[^&]*/, '');
+                }
+                endpoint += e.detail.search ? '?search=' + e.detail.search : '';
+                paGrid.endpoint = endpoint;
+            });
+
+            //paGrid.setAttribute('endpoint', this.getAttribute('base') + 'apps');
+            //class MyNewComponent extends customElements.get('app-endpoints') {}
+    }});
+
+</script>
+{% endblock %}

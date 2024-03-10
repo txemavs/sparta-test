@@ -1,0 +1,49 @@
+{% extends template %}
+{% load sparta static %}
+{% block header %}
+    {% header "API v2 - URL Patterns" %}    
+{% endblock %}
+
+{% block page %}
+<app-routes></app-routes>
+<script>
+App.define('app-routes', class extends App.Component {
+    connectedCallback() {
+        this.style.display = 'block';
+        this.style.height = '100%';
+        this.classList.add('ag-theme-balham');
+        
+        let grid = agGrid.createGrid(this, {
+            columnDefs: [
+                {field: 'id', headerName: 'ID', width:300, filter:false, hidden:true},
+                {field: 'name'},
+                {field: 'level'},
+                {field: 'view'},
+                {field: 'help'},
+                {field: 'cls'},
+                {field: 'ret'},
+                {field: 'root'},
+            ],
+            /* ...App.grid.options */
+            options:{
+                getRowId: params => params.data.id,
+                defaultColDef: {
+                    filter: true,
+                    flex: 1
+                },
+                pagination: false,
+                rowGroupPanelShow: 'always',
+                localeText: AG_GRID_LOCALE,
+                rowData: [],
+                rowSelection: 'single',
+            },
+        });
+
+        App.request('/app/routes/data/').then((data)=>{
+            grid.setGridOption('rowData', data)
+            grid.sizeColumnsToFit()
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends template %}
+{% load sparta static %}
+
+{% block links %}
+
+{% endblock %}
+
+{% block header %}
+{% header "Terminal" %}
+<ion-toolbar color='dark'>
+    <select id="sort-field">
+        <option value="name" selected>Name</option>
+        <option value="progress">Progress</option>
+        <option value="gender">Gender</option>
+        <option value="rating">Rating</option>
+        <option value="col">Favourite Colour</option>
+        <option value="dob">Date Of Birth</option>
+        <option value="car">Driver</option>
+    </select>
+
+    <select id="sort-direction">
+        <option value="asc" selected>asc</option>
+        <option value="desc">desc</option>
+    </select>
+
+    <button id="sort-trigger">Trigger Sort</button>
+</ion-toolbar>
+{% endblock %}
+
+{% block page %}
+<a-tabulator></a-tabulator>
+<link rel="stylesheet" type="text/css" href='{% static "app/css/tabulator_midnight.min.css"%}'>
+
+
+<script>
+
+
+    App.define('a-tabulator', class extends App.Component {
+        connectedCallback() {
+            this.innerHTML = `<div>
+                
+            </div>`;
+            this.style.height = '100%';
+            this.style.width = '100%';
+            this.style.display = 'block';
+            this.div = document.createElement('div');
+            this.div.style.height = '100%';
+            this.div.style.width = '100%';
+            this.appendChild(this.div);
+            (async () => {
+                await import('{% static "app/js/tabulator.min.js"%}');
+                //define some sample data
+                /*
+                var tabledata = [
+                    {id:1, name:"Oli Bob", age:"12", col:"red", dob:""},
+                    {id:2, name:"Mary May", age:"1", col:"blue", dob:"14/05/1982"},
+                    {id:3, name:"Christine Lobowski", age:"42", col:"green", dob:"22/05/1982"},
+                    {id:4, name:"Brendon Philips", age:"125", col:"orange", dob:"01/08/1980"},
+                    {id:5, name:"Margret Marmajuke", age:"16", col:"yellow", dob:"31/01/1999"},
+                ];
+
+                var table = new Tabulator(this.div, {
+                    height:"100%", // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                    data:tabledata, //assign data to table
+                    layout:"fitColumns", //fit columns to width of table (optional)
+                    columns:[ //Define Table Columns
+                        {title:"Name", field:"name", width:150},
+                        {title:"Age", field:"age", hozAlign:"left", formatter:"progress"},
+                        {title:"Favourite Color", field:"col"},
+                        {title:"Date Of Birth", field:"dob", sorter:"date", hozAlign:"center"},
+                    ],
+                });
+
+
+                //trigger an alert message when the row is clicked
+                table.on("rowClick", function(e, row){ 
+                    alert("Row " + row.getData().id + " Clicked!!!!");
+                });
+*/
+
+var fieldEl = this.querySelector("#sort-field");
+var dirEl = this.querySelector("#sort-direction")
+                var tabledatabig = [
+	{id:1, name:"Oli Bob", progress:12, gender:"male", rating:1, col:"red", dob:"14/04/1984", car:1, lucky_no:5},
+	{id:2, name:"Mary May", progress:1, gender:"female", rating:2, col:"blue", dob:"14/05/1982", car:true, lucky_no:10},
+	{id:3, name:"Christine Lobowski", progress:42, gender:"female", rating:0, col:"green", dob:"22/05/1982", car:"true", lucky_no:12},
+	{id:4, name:"Brendon Philips", progress:100, gender:"male", rating:1, col:"orange", dob:"01/08/1980", lucky_no:18},
+	{id:5, name:"Margret Marmajuke", progress:16, gender:"female", rating:5, col:"yellow", dob:"31/01/1999", lucky_no:33},
+	{id:6, name:"Frank Harbours", progress:38, gender:"male", rating:4, col:"red", dob:"12/05/1966", car:1, lucky_no:2},
+	{id:7, name:"Jamie Newhart", progress:23, gender:"male", rating:3, col:"green", dob:"14/05/1985", car:true, lucky_no:63},
+	{id:8, name:"Gemma Jane", progress:60, gender:"female", rating:0, col:"red", dob:"22/05/1982", car:"true", lucky_no:72},
+	{id:9, name:"Emily Sykes", progress:42, gender:"female", rating:1, col:"maroon", dob:"11/11/1970", lucky_no:44},
+	{id:10, name:"James Newman", progress:73, gender:"male", rating:5, col:"red", dob:"22/03/1998", lucky_no:9},
+	{id:11, name:"Martin Barryman", progress:20, gender:"male", rating:5, col:"violet", dob:"04/04/2001"},
+	{id:12, name:"Jenny Green", progress:56, gender:"female", rating:4, col:"indigo", dob:"12/11/1998", car:true},
+	{id:13, name:"Alan Francis", progress:90, gender:"male", rating:3, col:"blue", dob:"07/08/1972", car:true},
+	{id:14, name:"John Phillips", progress:80, gender:"male", rating:1, col:"green", dob:"24/09/1950", car:true},
+	{id:15, name:"Ed White", progress:70, gender:"male", rating:0, col:"yellow", dob:"19/06/1976"},
+	{id:16, name:"Paul Branderson", progress:60, gender:"male", rating:5, col:"orange", dob:"01/01/1982"},
+	{id:17, name:"Gemma Jane", progress:50, gender:"female", rating:2, col:"red", dob:"14/04/1983", car:true},
+	{id:18, name:"Emma Netwon", progress:40, gender:"female", rating:4, col:"brown", dob:"07/10/1963", car:true},
+	{id:19, name:"Hannah Farnsworth", progress:30, gender:"female", rating:1, col:"pink", dob:"11/02/1991"},
+	{id:20, name:"Victoria Bath", progress:20, gender:"female", rating:2, col:"purple", dob:"22/03/1986"},
+	];
+                var table = new Tabulator(this.div, {
+                        height:"100%",
+                        layout:"fitColumns",
+                        data:tabledatabig, //assign data to table
+                        columns:[
+                            {title:"Name", field:"name", width:200},
+                            {title:"Progress", field:"progress", hozAlign:"right", headerSortTristate:true},
+                            {title:"Gender", field:"gender", sorter:"string"},
+                            {title:"Rating", field:"rating",  hozAlign:"center", width:100},
+                            {title:"Favourite Color", field:"col", sorter:function(a,b){
+                                return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
+                            }},
+                            {title:"Date Of Birth", field:"dob", sorter:"date", hozAlign:"center"},
+                            {title:"Driver", field:"car", hozAlign:"center", sorter:"boolean"},
+                        ],
+                    });
+
+                    //Trigger sort when "Trigger Sort" button is clicked
+                    document.getElementById("sort-trigger").addEventListener("click", function(){
+                    table.setSort(fieldEl.options[fieldEl.selectedIndex].value, dirEl.options[dirEl.selectedIndex].value);
+                    });
+
+            })();
+        }
+
+    });
+
+
+
+</script>
+
+
+        
+        
+
+{% endblock %}

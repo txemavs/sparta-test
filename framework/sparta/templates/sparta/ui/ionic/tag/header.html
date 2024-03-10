@@ -1,0 +1,23 @@
+{% load sparta i18n %}
+
+
+    <ion-toolbar color='dark'>
+        <ion-buttons slot='start'>
+            <ion-menu-button onclick='App.menu_open()' auto-hide='false'></ion-menu-button>
+        </ion-buttons>
+        <ion-title id='title{{X}}'>{% trans title %}</ion-title>
+        <ion-buttons slot='end'>
+            {% if actions %}
+                <ion-button id='{{actions}}_btn{{X}}'>
+                    <ion-icon name='play' slot='start' style='transform: rotate(90deg);'></ion-icon>
+                    {% trans 'Actions' %}
+                </ion-button>
+            {% endif %}
+        </ion-buttons>
+        <ion-progress-bar type='determinate' value='1'></ion-progress-bar>
+    </ion-toolbar>
+
+
+{% if actions %}
+<ion-action-sheet id='{{actions}}{{X}}' trigger='{{actions}}_btn{{X}}' header={{header}}></ion-action-sheet>
+{% endif %}

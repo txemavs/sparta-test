@@ -1,0 +1,25 @@
+{% extends template %}
+{% load sparta static %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href='{% static "app/css/xterm.min.css"%}'>
+  <script src='{% static "app/js/xterm.min.js"%}'></script>
+  <script src='{% static "app/js/xterm-addon-fit.js"%}'></script>
+{% endblock %}
+
+{% block page %}
+  {% header "Terminal" %}
+  <div id="terminal" style="width:100%;height:100%;"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function (e) {
+      var term = new Terminal();
+      var fitAddon = new FitAddon.FitAddon();
+      term.loadAddon(fitAddon);
+      term.open(App.id('terminal'));
+      term.write('Dev terminal \x1B[1;3;31mterminal\x1B[0m $ ')
+      window.addEventListener('resize', () => {
+        fitAddon.fit();
+      });
+    });
+  </script>
+{% endblock %}

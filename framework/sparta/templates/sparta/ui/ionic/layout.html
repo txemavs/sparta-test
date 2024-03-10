@@ -1,0 +1,67 @@
+{% extends "sparta/htmx/layout.html" %}
+
+{% block head %}
+    <!--/sparta/ui/ionic -->
+    <link rel="stylesheet" type="text/css" href='https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css' />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>    
+{% endblock %}
+
+{% block body %}
+
+<style>
+    .pa-application {
+        display: block; /* Ensure the element is block-level */
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<ion-app><!-- page hx-history-elt hx-push-url="true" -->
+    {% include 'app/menu.html' %}
+    <ion-header id='header'>
+        {% block header %}{% endblock %}
+    </ion-header>
+    <ion-content id='main'>
+        {% block page %}{% endblock %}
+    </ion-content>
+    <ion-footer id='footer' class="ion-text-center"> 
+        {% block footer %}{% endblock %}
+    </ion-footer>
+    <ion-menu side="end" id="console" content-id="main">
+        <pre id="stdout"
+            style="padding:2px 0 2px 3px ;font-size:10px;margin:0;width:100%;height:100%;background:#000;color:#FFF"></pre>
+    </ion-menu>        
+</ion-app>
+
+<script>
+    class PaApplication extends HTMLElement {
+        connectedCallback() {
+            this.innerHTML = `<ion-app>${this.innerHTML}</ion-app>`;
+        }
+    }
+    customElements.define('pa-application', PaApplication);
+
+
+    document.querySelectorAll('ion-item').forEach(item => {
+        item.addEventListener('click', function () {
+            // Remove 'ion-color ion-color-primary' class from all items
+            document.querySelectorAll('ion-item').forEach(item => {
+                item.classList.remove('ion-color', 'ion-color-primary');
+            });
+
+            // Add 'ion-color ion-color-primary' class to the clicked item
+            this.classList.add('ion-color', 'ion-color-primary');
+        });
+    });
+
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.htmx) {
+            console.log('popstate');
+            //var mainElement = document.querySelector('#main');
+            //htmx.ajax('GET', window.location.pathname, mainElement);
+        }
+    });
+
+</script>
+{% endblock %}

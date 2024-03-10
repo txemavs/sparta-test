@@ -1,0 +1,124 @@
+# P4Q Tools Framework asyncronous services orchestration
+#                                                                   (c)2023 P4Q 
+#
+# Full production example for HTTP/HTTPS and WS/WSS asyncronous services.
+# Exposes http://localhost:1111 for nginx and http://localhost:8000 for django
+
+# This is the orchestration configuration for the P4Q Tools Framework. Folders:
+# - compose: Dockerfiles for the services
+# - documentation: contains the sphinx builder
+# - framework: the Django Framework project.
+#   - api: contains the old API app
+#   - api2: contains the NEW api app
+#   - serverlite: contains the old Models
+
+networks:
+  net:
+  
+volumes:
+  database:
+  collected:
+  backups:
+
+services:
+  
+  # PostGIS is Postgres with extensions for gis (gdal) 
+  #---------------------------------------------------------------------------
+  db:
+    build:
+      context: ./compose/postgis
+    image: sparta-postgis
+    #command: sh -c "./init.sh"
+    volumes:
+      - backups:/var/backups
+      - database:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    networks:
+      - net
+
+
+  # Queue for websockets
+  #---------------------------------------------------------------------------
+  redis:
+    build:
+      context: ./compose/redis
+    image: sparta-redis
+    command: sh -c "./init.sh"
+    networks:
+      - net
+
+
+  # HTTP/HTTPS web service - WSGI Django applications  
+  #---------------------------------------------------------------------------
+  wsgi:
+    build: ./compose/django
+    image: 'sparta-django'
+    command: /home/sparta/venv/bin/uwsgi --wsgi-file /home/sparta/framework/server/wsgi.py --uid 1000 --gid 1000
+    environment:
+      - ENTRY=WSGI
+      - PGPASSWORD
+    volumes:
+      - ./framework/:/home/sparta/framework/
+      - ./documentation/:/home/sparta/documentation/   
+      - collected:/home/sparta/collected/static/
+      - backups:/var/backups
+    working_dir: /home/sparta/framework
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    networks:
+      - net
+    ports:  
+      - "8000:8000" #-> Development server
+      - "8008:8008" #-> Development server
+    expose:
+      - "8001" #-> nginx
+    
+
+  # WS/WSS asynchronous service - ASGI Django applications
+  #---------------------------------------------------------------------------
+  asgi:
+    build: ./compose/django
+    image: 'sparta-django'
+    command: /home/sparta/venv/bin/daphne -b 0.0.0.0 -p 8002 server.asgi:application
+    environment:
+      - ENTRY=ASGI
+    volumes_from:
+      - wsgi
+    working_dir: /home/sparta/framework
+    depends_on:
+      - db
+      - redis
+      - wsgi
+    env_file:
+      - ./.env
+    networks:
+      - net
+    expose:
+      - "8002" #-> nginx
+
+
+  # The web server: nginx
+  #---------------------------------------------------------------------------
+  web:
+    build: ./compose/nginx
+    image: 'sparta-nginx'
+    volumes:
+      - collected:/home/sparta/collected/static/
+    ports:
+      - "300:80"
+    depends_on:
+      - wsgi
+      - asgi 
+    env_file:
+      - ./.env
+    networks:
+      - net
+
+
+
+

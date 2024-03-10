@@ -1,0 +1,27 @@
+
+{% load i18n tools static django_htmx %}
+
+<!-- START app/ionic/block/grid -->
+<ion-content>
+    <div id="{{id}}" 
+        class="ag-theme-{% if theme %}{{theme}}{% else %}balham{% endif %}" 
+        style="width:100%;height:100%;">
+    </div>
+</ion-content>
+
+<script>
+(() => {
+    
+    let grid = agGrid.createGrid(App.id('{{id}}'), {
+    /* TAG {% app_grid_column_defs columns %} */
+    ...App.grid.options
+    });
+    App.request('{{fetch}}').then((data)=> {
+        grid.setGridOption('rowData', data)
+        grid.sizeColumnsToFit()
+    });
+    
+
+})()
+</script>
+<!-- END app/ionic/block/grid -->

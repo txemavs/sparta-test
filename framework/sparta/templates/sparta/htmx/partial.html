@@ -1,0 +1,39 @@
+{% load django_htmx sparta static i18n %}<!-- {{request.method}} {{request.path_info}} -->{% get_current_language as LANGUAGE_CODE %}
+{% if request.htmx %}
+<!-- spartan response for {{request.user}} at {{request.htmx.current_url}}-->
+<!-- triggered by {{request.htmx.trigger_name}} event {{request.htmx.triggering_event}} -->
+<!-- prompt: {{request.htmx.prompt}} -->
+<!-- {% if request.htmx.history_restore_request %}HISTORY {% endif %}{{request.method}}-->
+
+{% if request.htmx.target == "main" %}
+
+<div id='header' hx-swap-oob="true"><!--🟡 block header -->
+{% block header %}{% header request.path_info %}{% endblock %}</div>
+
+<div id='footer' hx-swap-oob="true" class="ion-text-center"><!--🟡 block footer -->
+{% block footer %}<!-- no footer -->{% endblock %}</div>
+
+{% endif %}
+
+{% else %}<!-- error: no htmx headers found -->{% endif %}
+<!--🟡 block page: {{request.htmx.target}} -->
+{% block head %}{% endblock %}
+{% block page %}{% endblock %}
+
+
+{% if request.htmx %}
+<!-- current_url_abs_path: {{request.htmx.current_url_abs_path}} -->
+<!-- history_restore_request: {{request.htmx.history_restore_request}} -->
+<!-- prompt: {{request.htmx.prompt}} -->
+
+<!-- sparta script -->
+<script>
+    App.pub('part:{{request.htmx.target}}:load', {
+        target: '{{request.htmx.target}}', //TODO: response target 
+        event: '{{request.htmx.triggering_event}}',
+        url: '{{request.get_full_path}}',
+        view: '{{request.resolver_match.view_name}}'
+    });
+</script>
+<!--🟠 end spartan response {{LANGUAGE_CODE}}{{X}} {{request.path_info}}-->
+{% endif %}

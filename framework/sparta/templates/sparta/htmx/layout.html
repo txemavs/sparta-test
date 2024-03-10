@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{% load django_htmx sparta static i18n %}
+{% target request as target %}
+{% get_current_language as LANGUAGE_CODE %}<!--response {{request.number}} {{LANGUAGE_CODE}}{{X}} for {{request.user}}-->
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <title>{% block title %}Sparta Test{% endblock %}</title>
+    <meta name="author" content="txema@nabla.net" />
+    <meta name="description" content="{% block description %}Experimental{% endblock %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Django 5.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    <script src='{% static "app/js/htmx.min.js"%}'></script>
+    {% django_htmx_script %}
+    <script src='{% static "app/js/rxjs.umd.min.js" %}'></script>
+    <script src='{% static "app/js/ag-grid-community.min.js" %}'></script>
+    <script src='{% static "app/js/ag-grid-locale.js" %}'></script>
+    <script src='{% static "app/js/json-viewer.bundle.js" %}'></script>
+    <script src='/sparta/app.js'></script>
+    {% block head %}{% endblock %}
+    {% block links %}{% endblock %}
+    <link rel="stylesheet" type="text/css" href='{% static "app/css/app.css"%}'>
+    {% block css %}{% endblock css %}
+</head>
+<body>
+{% block body %} {% endblock %}
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends template %}
+{% load sparta static i18n %}
+{% block header %}
+{% header "API: /api/v2/apps" %}
+<ion-searchbar animated="true" showCancelButton="true" placeholder="Search..." search-icon="search">
+</ion-searchbar>
+<pa-bar>
+    <ion-select placeholder="Apps">
+        {% for endpoint in endpoints %}<ion-select-option value="{{endpoint.id}}">{{endpoint.name}}</ion-select-option>
+        {% endfor %}
+    </ion-select>
+</pa-bar>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block page %}
+<app-grid-api>
+    <pa-grid endpoint="/api/v2/apps" style="height:100%;"></pa-grid>
+    <pa-modal2 title="Select endpoint">
+            <ion-list>
+                {% for endpoint in endpoints %}
+                <ion-item onclick="App.emit(App.$('app-grid-api'), 'modal:item:selected', '{{endpoint.id}}')">
+                    <ion-label>{{endpoint.name}}</ion-label>
+                </ion-item>
+                {% endfor %}
+            </ion-list>
+    </pa-modal2>
+</app-grid-api>
+<script>
+
+    //  type="module"
+    // import '/app/components/pa/modal2.js'; 
+    // Because app-grid-api calls .present(), we can't wait fot it
+    // Now App.defined solves this problem
+    // Still, pa-modal does not slot the content
+
+    App.define('app-grid-api', class extends App.Component {
+        connectedCallback() {
+            this.style.display = 'block';
+            this.style.height = '100%';
+            const searchbar = App.$('#header ion-searchbar');
+            const select = App.$('#header ion-select');
+            const grid = this.$('pa-grid');
+            let modal = this.$('pa-modal2');
+                
+            //App.$('ion-modal ion-header ion-button').click = () => modal.dismiss();
+
+            const set_endpoint = (url) => {
+                App.$('#header ion-title').innerText = url;
+                grid.endpoint = url
+            };
+            
+
+            select.addEventListener('ionChange', (e)=>{
+                set_endpoint(e.detail.value)
+            });
+
+            searchbar.addEventListener('ionChange', (e)=>{
+                set_endpoint(grid.endpoint + '?search=' + e.detail.value);
+            })
+
+            this.addEventListener('modal:item:selected', (e)=>{
+                set_endpoint(e.detail)
+                modal.dismiss()
+            });
+            
+
+            App.defined('pa-modal2').then(() => {
+                console.log('app-drawer modal2 defined');
+                App.ready(() => modal.present());
+            });
+
+            
+        }
+        
+    });
+
+</script>
+{% endblock %}

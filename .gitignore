@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.*.example
+.secret
+.vscode/
+.VSCodeCounter/
+fixtures/
+__pycache__/
+*.py[cod]
+
+compose/django/GitHub
+compose/nodejs/GitHub
+compose/postgis/*.sql

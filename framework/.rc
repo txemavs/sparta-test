@@ -1,0 +1,2 @@
+echo "Activating sparta enviroment..."
+source /usr/src/sparta/bin/activate

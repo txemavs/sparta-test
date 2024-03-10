@@ -1,0 +1,8 @@
+<!-- extends template -->
+{% load rest_framework %}
+
+<form action="{{action}}" method="post">
+    {% csrf_token %}
+    {% render_form serializer template_pack='app/ionic/forms' %}
+    <input type="submit" value="Save" />
+</form>

@@ -1,0 +1,173 @@
+#!/bin/bash
+
+set -e
+
+DB=$POSTGRES_DATABASE
+
+PostgresRequired() {
+    # Install psql if not available
+    if ! command -v psql &> /dev/null
+    then
+        apt-get install -y postgresql-client
+    fi
+    export PGPASSWORD=$POSTGRES_PASSWORD
+}
+
+WaitForDatabase() {
+    if ! command -v nc &> /dev/null
+    then
+        apt-get install -y netcat-traditional
+    fi
+    while ! nc -z "db" "5432"; do
+        echo "Waiting for PostgreSQL to accept connections..."
+        sleep 1
+    done
+}
+
+
+ShowDatabases() {
+    PostgresRequired
+    psql_databases="SELECT datname AS Database, datcollate AS Collation FROM pg_database;"
+    psql -h db -p 5432 -U root $DB -c "$psql_databases"
+}
+
+
+
+CreateSuperUser() {
+    admin_exists="from serverlite.models import ServerUser; print(ServerUser.objects.filter(username='$DJANGO_SUPERUSER_EMAIL').exists())"
+    if [ "$(python manage.py shell -c "$admin_exists" )" = "False" ]
+    then
+        echo "Creating superuser $DJANGO_SUPERUSER_EMAIL:$DJANGO_SUPERUSER_PASSWORD"
+        python manage.py createsuperuser --username=$DJANGO_SUPERUSER_EMAIL --first_name='Dev' --last_name='Test' --no-input
+    fi
+}
+
+
+if [ "$1" = "framework" ]; then
+    source $0 help
+    echo "Use the terminal to run Django."
+    echo " - DJANGO_ALLAUTH: $DJANGO_ALLAUTH"
+    echo " - DJANGO_DEBUG_TOOLBAR: $DJANGO_DEBUG_TOOLBAR"
+    echo " - DJANGO_STORAGES: $DJANGO_STORAGES"
+    
+
+elif [ "$1" = "serve" ]; then
+    echo "Web server at http://localhost:8000/" 
+    python manage.py runserver 
+
+elif [ "$1" = "dev" ]; then
+    echo "Web server at http://localhost:8099/" 
+    python manage.py runserver 0.0.0.0:8099 --settings=dev.settings
+
+
+elif [ "$1" = "test" ]; then
+    python manage.py test
+
+
+elif [ "$1" = "static" ]; then
+    echo "Collecting static assets (S3 $DJANGO_STORAGES)..."
+    python manage.py collectstatic --no-input
+
+elif [ "$1" = "waitdb" ]; then
+    WaitForDatabase
+
+elif [ "$1" = "superuser" ]; then
+    CreateSuperUser
+   
+
+elif [ "$1" = "initial" ]; then
+
+    for model in "${initial[@]}"
+    do
+        echo "Loading: $model"
+        if [ -f "fixtures/$model.json" ]; then
+            python manage.py loaddata fixtures/$model.json
+        else
+            echo "File not found: fixtures/$model.json"
+        fi
+    done
+
+elif [ "$1" = "loaddata" ]; then
+    echo "Checking required initial models..."
+    python manage.py loaddata fixtures/Group.json
+    python manage.py loaddata fixtures/Permission.json
+    for model in "${serverlite[@]}"
+    do
+        echo "Loading serverlite: $model"
+        if [ -f "$fixtures/$model.json.gz" ]; then
+            gunzip $fixtures/$model.json.gz
+        fi
+        if [ -f "$fixtures/$model.json" ]; then
+            python manage.py loaddata $fixtures/$model.json
+            gzip $fixtures/$model.json
+        fi
+    done
+
+
+elif [ "$1" = "initialize" ]; then
+    python manage.py flush --no-input 
+    python manage.py makemigrations
+    python manage.py migrate
+    source $0 initial
+    source $0 superuser
+
+
+
+
+elif [ "$1" = "psql" ]; then
+    PostgresRequired
+    echo "PostgreSQL terminal - \q to quit"
+    echo " "
+    psql -h db -p 5432 -U root $POSTGRES_DB 
+
+
+elif [ "$1" = "db" ]; then
+    ShowDatabases
+
+
+elif [ "$1" = "clean_cache" ]; then
+    find . -path "*/__pycache__/*.py" -not -name "__init__.py" -delete
+
+
+elif [ "$1" = "graph" ]; then
+    python manage.py graph_models $2 > $static_dev/$2.dot
+    cat $static_dev/$2.dot | dot -Tsvg > $static_dev/$2.svg
+    # python manage.py collectstatic --no-input if ./static/dev
+
+
+elif [ "$1" = "no_migrations" ]; then
+    find . -path "*/migrations/*.py" -not -name "__init__.py" -print
+    read -p "Are you sure you want to delete all migrations? " -n 1 -r
+    case $REPLY in
+        [Yy]* ) 
+            find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+            echo "Deleted"
+            ;;
+        * ) 
+            echo
+            echo "Cancelled"
+            ;;
+    esac
+
+
+
+
+else
+    echo " "
+    echo "Sparta Framework commands:"
+    echo "-------------------------------------------------------------------"
+    echo " # $0 serve                   Start development server at port 8099"
+    echo " # $0 static                  Collect static assets"
+    echo " # $0 superuser               Create a SuperUser"
+    echo " # $0 initial                 Load basic tables"
+    echo " # $0 initialize              Restart migrations and reload data"
+    echo " # $0 loaddata                Load data from serverlite/fixtures"
+    echo " # $0 dumpdata                Dump all data to serverlite/fixtures"
+    echo " # $0 psql                    Postgres SQL CLI"
+    #echo " # $0 document                Generate sphinx docs"
+    echo " # $0 graph app_name          Generate graphviz model diagram"
+    echo " # $0 no_migrations           Delete all migrations"
+    echo "-------------------------------------------------------------------"
+    echo " "
+    #exit 1
+fi
