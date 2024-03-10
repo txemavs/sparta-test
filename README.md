@@ -10,6 +10,8 @@ applications quickly using htmx.
 You can create your python env, install requirements.txt and run the Django 
 development server.
 
+Docker
+------
 This repository includes a example production container ochestration with 
 nginx cofigured to serve the static files and expose the wsgi and asgi 
 services using a proxy.
@@ -21,11 +23,10 @@ Five containers:
  - asgi: sparta-django - ASGI asyncronous server
  - redis: sparta-queue - A Redis memory for incoming messages 
 
+Run `docker compose up --build` and the all images are created.
+Sparta test will be on http://localhost:300/
 You can remove redis and asgi from compose and nginx if you are not using channels.
 
-Run 'docker compose up --build' and the all images are created.
-
-Sparta test will be on http://localhost:300/
 
 Concepts:
 ---------
@@ -34,24 +35,24 @@ The repository folders:
  - sparta: The future "django-sparta" package, for now you can copy it to your project to use it.
  - app: An example application
 
-
-Django settings
-===============
-
-To install sparta, you need to copy the sparta folder to your project and configure settings:
-
- - Add 'sparta' to INSTALLED_APPS
- - Add 'sparta.middleware.SpartaMiddleware' to MIDDLEWARE
- - Add 'sparta.context.processor' to TEMPLATES['OPTIONS']['context_processors']
-
 Sparta
 ======
 
+Django settings
+---------------
+
+To install sparta, you need to copy the sparta folder to your project and configure settings:
+
+ - Add 'sparta' to `INSTALLED_APPS`
+ - Add 'sparta.middleware.SpartaMiddleware' to `MIDDLEWARE`
+ - Add 'sparta.context.processor' to `TEMPLATES['OPTIONS']['context_processors']`
+
 You need to have 2 templates configured in your settings:
-SPARTA = {
-    'layout': 'sparta/ui/ionic/layout.html',
-    'partial': 'sparta/htmx/partial.html'
-}
+     
+     SPARTA = {
+         'layout': 'sparta/ui/ionic/layout.html',
+         'partial': 'sparta/htmx/partial.html'
+     }
 
 The 'layout' template contains the fixed landing template thar is served on first request.
 
@@ -77,34 +78,34 @@ Note:
  This is the global object with the client side spartan helpers, for example:
    - App.Component: A base class for custom web elements with shadow root.
    - App.define('pa-custom', [class]): registers a custom component, 
-     using the cls if provided, or importing a file at the url 'app/components/pa/custom.js'+
+     using the cls if provided, or importing a file at the url app/components/pa/custom.js
 
-Partial page template:
-----------------------
-{% extends template %}<!-- render inside layout or partial response  -->
-{% load sparta static i18n %}
-{% block header %}
-    {% header "Title" %}
-{% endblock %}
-
-{% block footer %}
-    <pa-searchbar ></pa-searchbar>
-    <!-- no need to App.define('pa-*'), boot or mutation observer will do this -->
-    <!-- custom elements must have closing tag -->
-{% endblock %}
-
-{% block page %}
-<app-part attribute='value' style="height:100%;"></app-part>
-<script>
-    //This will be run once, redefining a custom element is not possible 
-    App.define('app-part', class extends App.Component {
-        connectedCallback() {
-            this.style.display = 'block';
-            //... 
-
-        }
-    });
-
-</script>
-{% endblock %}
+Page template example
+---------------------
+ 
+    {% extends template %}
+    {% load sparta static i18n %}
+    {% block header %}
+        {% header "Title" %}
+    {% endblock %}
+    
+    {% block footer %}
+        <pa-searchbar ></pa-searchbar>
+        <!-- no need to App.define('pa-*'), boot or mutation observer will do this -->
+        <!-- custom elements must have closing tag -->
+    {% endblock %}
+    
+    {% block page %}
+    <app-part attribute='value' style="height:100%;"></app-part>
+    <script>
+        //This will be run once, redefining a custom element is not possible 
+        App.define('app-part', class extends App.Component {
+            connectedCallback() {
+                this.style.display = 'block';
+                //... 
+            }
+        });
+    
+    </script>
+    {% endblock %}
 
